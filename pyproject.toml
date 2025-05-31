@@ -1,0 +1,57 @@
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".venv",
+    ".vscode",
+    "venv",
+    "frontendruff",
+    "migrations",
+]
+target-version = "py312"
+line-length = 119
+lint.ignore = ["D"]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = true
+
+
+[tool.poetry]
+name = "gopher-bot"
+version = "0.1.0"
+description = ""
+authors = ["Vladislav Yaremenko <vlad.yaremenko.98@yandex.ru>"]
+license = "MIT"
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiogram = "^3.20.0.post0"
+apscheduler = "^3.11.0"
+django = "^5.2.1"
+python-dotenv = "^1.1.0"
+daphne = "^4.2.0"
+django-asgi-lifespan = "^0.4.0"
+uvicorn = "^0.34.2"
+django-ckeditor = "^6.7.2"
+html-to-markdown = "^1.3.2"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.11.12"
+pre-commit = "^4.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
