@@ -11,10 +11,10 @@ from constants.admin import SIZE_MEDIA_CONTENT
 class PostAdmin(admin.ModelAdmin):
     """Админ-панель постов."""
 
-    list_display = ('id', 'title', 'is_published')
-    list_editable = ('title', 'is_published')
+    list_display = ('id', 'title', 'is_published', 'type', 'datetime_publication')
+    list_editable = ('title', 'is_published', 'type', 'datetime_publication')
     search_fields = ('title',)
-    list_filter = ('is_published',)
+    list_filter = ('is_published', 'type')
 
     inlines = (MediaContentInline,)
 

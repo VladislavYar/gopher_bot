@@ -2,6 +2,7 @@ import os
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from ckeditor.fields import RichTextField
 
@@ -17,6 +18,15 @@ from constants.models import (
 
 class Post(models.Model):
     """Модель поста."""
+
+    class Type(models.TextChoices):
+        """Mapping типов поста."""
+
+        POST = 'post', _('Пост')
+        GOOD_MORNING = 'good_morning', _('Доброе утро')
+        GOOD_NIGHT = 'good_night', _('Спокойной ночи')
+        HAPPY = 'happy', _('Счасливый')
+        SAD = 'sad', _('Грустный')
 
     title = models.CharField(
         max_length=MAX_LEN_TITLE,
@@ -37,6 +47,18 @@ class Post(models.Model):
         verbose_name=_('Текст поста'),
         help_text=_('Текст поста'),
         db_comment=_('Текст поста'),
+    )
+    type = models.CharField(
+        verbose_name=_('Тип поста'),
+        help_text=_('Тип поста'),
+        choices=Type.choices,
+        default=Type.POST,
+    )
+    datetime_publication = models.DateTimeField(
+        verbose_name=_('Дата и время публикации'),
+        help_text=_('Дата и время публикации'),
+        db_comment=_('Дата и время публикации'),
+        default=timezone.now,
     )
 
     def __str__(self) -> str:
