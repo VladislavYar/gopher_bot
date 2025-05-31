@@ -6,7 +6,7 @@ from utils.bot import get_content_post
 
 
 async def send_post(bot: Bot, type: str) -> None:
-    """Отправляет сообщение в канал.
+    """Отправляет пост в канал.
 
     Args:
         bot (Bot): экземпляр бота.

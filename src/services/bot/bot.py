@@ -1,4 +1,4 @@
-from aiogram import Bot as TelegramBot
+from aiogram import Dispatcher, Bot as TelegramBot
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -8,7 +8,7 @@ from django.conf import settings
 
 from contents.models import Post
 from constants.bot import GOOD_MORNING_TIME, GOOD_NIGHT_TIME, INTERVAL_POST_TIME
-from services.bot.dispatcher import dp
+from services.bot.routers import router
 from services.bot.tasks import send_post
 from utils.metaclasses import SingletonMeta
 
@@ -18,6 +18,8 @@ class Bot(metaclass=SingletonMeta):
 
     def __init__(self) -> None:
         """Инициализация бота."""
+        self.dp = Dispatcher()
+        self.dp.include_router(router)
         self.bot = TelegramBot(
             token=settings.BOT_TOKEN,
             default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2),
@@ -42,9 +44,9 @@ class Bot(metaclass=SingletonMeta):
     async def start(self) -> None:
         """Старт бота и фоновых задач."""
         self.scheduler.start()
-        await dp.start_polling(self.bot)
+        await self.dp.start_polling(self.bot)
 
     async def stop(self) -> None:
         """Остановка бота и фоновых задач."""
         self.scheduler.shutdown(wait=False)
-        await dp.stop_polling()
+        await self.dp.stop_polling()
