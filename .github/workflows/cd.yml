@@ -1,6 +1,9 @@
-name: Workflow For Deploy Prod
+name: Workflow For Deploy
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -43,7 +46,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
       - name: Sync infra to server
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./infra/ ${{ secrets.USER }}@${{ secrets.HOST }}:~/tovaryplus/infra/
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./infra/ ${{ secrets.USER }}@${{ secrets.HOST }}:~/gopher_bot/infra/
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
@@ -51,7 +54,7 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ~/tovaryplus/infra/
+            cd ~/gopher_bot/infra/
             sudo docker login -u=${{ secrets.DOCKER_USERNAME }} -p=${{ secrets.DOCKER_PASSWORD }}
             sudo docker system prune -a -f
             sudo docker compose pull
