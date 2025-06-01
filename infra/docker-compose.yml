@@ -20,7 +20,7 @@ services:
       - 443:443
 
   db:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
     env_file: .env
     restart: on-failure
     volumes:
