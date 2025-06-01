@@ -38,6 +38,10 @@ STATICFILES_DIRS = (
 )
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://127.0.0.1,http://localhost',
+).split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
