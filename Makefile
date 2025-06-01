@@ -10,6 +10,11 @@ collectstatic: # Собрать статику.
 createsuperuser: # Создать супер пользователя.
 	python src/manage.py createsuperuser --noinput
 
+project-start-in-container: # Запуск проекта в контейнере.
+	make migrate;
+	make collectstatic;
+	cd src && uvicorn config.asgi:application --lifespan=on;
+
 clear-volumes-local: # Удаление Volumes.
 	docker compose -f ./infra/docker-compose-local.yml --env-file ./infra/.env down --volumes;
 	@sleep 5;
