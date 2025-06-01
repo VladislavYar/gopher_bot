@@ -13,7 +13,7 @@ createsuperuser: # Создать супер пользователя.
 project-start-in-container: # Запуск проекта в контейнере.
 	make migrate;
 	make collectstatic;
-	cd src && uvicorn config.asgi:application --lifespan=on;
+	cd src && uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --lifespan=on;
 
 clear-volumes-local: # Удаление Volumes.
 	docker compose -f ./infra/docker-compose-local.yml --env-file ./infra/.env down --volumes;
