@@ -16,4 +16,4 @@ COPY poetry.lock /app
 COPY Makefile /app
 COPY README.md /app
 
-RUN apt-get update && apt-get install make postgresql-client-17 -y && pip3 install --no-cache-dir poetry && poetry install --only=main --no-cache --no-interaction --no-ansi
+RUN apt-get update && apt-get install make postgresql-client-16 -y && pip3 install --no-cache-dir poetry && poetry install --only=main --no-cache --no-interaction --no-ansi
