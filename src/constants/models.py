@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 MAX_LEN_TITLE = 255
 UPLOAD_TO_CONTENT = 'contents/'
 IMAGE_FORMATS = (
@@ -23,3 +25,11 @@ AUDIO_FORMATS = (
     'flac',
 )
 MESSAGE_INCORRECT_FILE_FORMAT = 'Некорректный формат файла, текущий формат: {}. Доступные форматы: {}.'
+
+
+class PostTypeEnum(StrEnum):
+    """Enum базовых типов поста."""
+
+    HAPPY = 'happy'
+    SAD = 'sad'
+    POST = 'post'

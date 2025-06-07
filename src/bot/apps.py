@@ -17,6 +17,6 @@ class BotConfig(AppConfig):
         """Вызывается при запуске приложения."""
         from services.bot import Bot
 
-        self.bot = Bot()
+        self.bot: Bot = Bot()
         asgi_shutdown.connect(self.stop)
         self.task = asyncio.ensure_future(self.bot.start())

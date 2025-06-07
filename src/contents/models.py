@@ -19,15 +19,6 @@ from constants.models import (
 class Post(models.Model):
     """Модель поста."""
 
-    class Type(models.TextChoices):
-        """Mapping типов поста."""
-
-        POST = 'post', _('Пост')
-        GOOD_MORNING = 'good_morning', _('Доброе утро')
-        GOOD_NIGHT = 'good_night', _('Спокойной ночи')
-        HAPPY = 'happy', _('Счасливый')
-        SAD = 'sad', _('Грустный')
-
     title = models.CharField(
         max_length=MAX_LEN_TITLE,
         unique=True,
@@ -48,17 +39,11 @@ class Post(models.Model):
         help_text=_('Текст поста'),
         db_comment=_('Текст поста'),
     )
-    type = models.CharField(
-        verbose_name=_('Тип поста'),
-        help_text=_('Тип поста'),
-        choices=Type.choices,
-        default=Type.POST,
-    )
     datetime_publication = models.DateTimeField(
+        default=timezone.now,
         verbose_name=_('Дата и время публикации'),
         help_text=_('Дата и время публикации'),
         db_comment=_('Дата и время публикации'),
-        default=timezone.now,
     )
 
     def __str__(self) -> str:
@@ -67,6 +52,52 @@ class Post(models.Model):
     class Meta:
         verbose_name = _('Пост')
         verbose_name_plural = _('Посты')
+
+
+class PostType(models.Model):
+    """Модель типа поста."""
+
+    title = models.CharField(
+        max_length=MAX_LEN_TITLE,
+        unique=True,
+        verbose_name=_('Тайтл типа поста'),
+        help_text=_('Тайтл типа поста'),
+        db_comment=_('Тайтл типа поста'),
+    )
+    key = models.SlugField(
+        unique=True,
+        db_index=True,
+        verbose_name=_('Ключ типа поста'),
+        help_text=_('Ключ типа поста'),
+        db_comment=_('Ключ типа поста'),
+    )
+    time_publication = models.TimeField(
+        blank=True,
+        null=True,
+        verbose_name=_('Время публикации'),
+        help_text=_('Время публикации(если пустой, публикуется при кажом запуске cron)'),
+        db_comment=_('Время публикации'),
+    )
+    is_publish = models.BooleanField(
+        default=True,
+        verbose_name=_('Флаг разрешения публикации'),
+        help_text=_('Флаг разрешения публикации'),
+        db_comment=_('Флаг разрешения публикации'),
+    )
+    posts = models.ManyToManyField(
+        to=Post,
+        blank=True,
+        related_name='types',
+        verbose_name=_('Посты типа постов'),
+        help_text=_('Посты типа постов'),
+    )
+
+    def __str__(self) -> str:
+        return f'{self.pk}-{self.title}-{self.key}'
+
+    class Meta:
+        verbose_name = _('Тип поста')
+        verbose_name_plural = _('Тип поста')
 
 
 class MediaContent(models.Model):
@@ -87,15 +118,15 @@ class MediaContent(models.Model):
         help_text=_('Пост'),
     )
     content = models.FileField(
+        upload_to=UPLOAD_TO_CONTENT,
         verbose_name=_('Контент'),
         help_text=_('Контент'),
-        upload_to=UPLOAD_TO_CONTENT,
     )
     type = models.CharField(
-        verbose_name=_('Тип контента'),
-        help_text=_('Тип контента'),
         choices=Type.choices,
         default=Type.IMAGE,
+        verbose_name=_('Тип контента'),
+        help_text=_('Тип контента'),
     )
 
     def __str__(self) -> str:

@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import SafeString
 
-from contents.models import Post, MediaContent
-from contents.inlines import MediaContentInline
+from contents.models import PostType, Post, MediaContent
+from contents.inlines import PostTypeManyToManyInline, PostManyToManyInline, MediaContentInline
 from constants.admin import SIZE_MEDIA_CONTENT
 
 
@@ -11,12 +11,24 @@ from constants.admin import SIZE_MEDIA_CONTENT
 class PostAdmin(admin.ModelAdmin):
     """Админ-панель постов."""
 
-    list_display = ('id', 'title', 'is_published', 'type', 'datetime_publication')
-    list_editable = ('title', 'is_published', 'type', 'datetime_publication')
+    list_display = ('id', 'title', 'is_published', 'datetime_publication')
+    list_editable = ('title', 'is_published', 'datetime_publication')
     search_fields = ('title',)
-    list_filter = ('is_published', 'type')
+    list_filter = ('is_published', 'types')
 
-    inlines = (MediaContentInline,)
+    inlines = (MediaContentInline, PostTypeManyToManyInline)
+
+
+@admin.register(PostType)
+class PostTypeAdmin(admin.ModelAdmin):
+    """Админ-панель типов постов."""
+
+    list_display = ('id', 'title', 'key', 'time_publication')
+    list_editable = ('title', 'key', 'time_publication')
+    search_fields = ('title', 'key')
+    list_filter = ('title', 'key')
+
+    inlines = (PostManyToManyInline,)
 
 
 @admin.register(MediaContent)

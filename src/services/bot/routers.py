@@ -6,7 +6,7 @@ from aiogram.filters import Command
 from django.utils import timezone
 
 from constants.bot import CommandEnum, TypeChatEnum
-from contents.models import Post
+from constants.models import PostTypeEnum
 from services.bot.filters import IsAdminFilter
 from utils.bot import get_content_post, content_reply_to_message
 
@@ -77,7 +77,7 @@ async def handler_happy(message: Message) -> None:
     await message.delete()
     audios, images_videos, text, _ = await get_content_post(
         is_published=False,
-        type=Post.Type.HAPPY,
+        types__key=PostTypeEnum.HAPPY,
         datetime_publication__lte=timezone.now(),
     )
     try:
@@ -101,7 +101,7 @@ async def handler_sad(message: Message) -> None:
     await message.delete()
     audios, images_videos, text, _ = await get_content_post(
         is_published=False,
-        type=Post.Type.SAD,
+        types__key=PostTypeEnum.SAD,
         datetime_publication__lte=timezone.now(),
     )
     try:

@@ -3,13 +3,14 @@ from datetime import datetime
 from aiogram.enums import InputMediaType
 from aiogram.types.input_file import FSInputFile
 from aiogram.types import InputMediaVideo, InputMediaPhoto, Message
+from django.db.models import Model
 from html_to_markdown import convert_to_markdown
 
 from contents.models import Post, MediaContent
 
 
 async def get_content_post(
-    **kwargs: bool | str | int | datetime,
+    **kwargs: bool | str | int | datetime | Model,
 ) -> tuple[
     list[FSInputFile],
     list[InputMediaPhoto | InputMediaVideo],

@@ -10,6 +10,9 @@ collectstatic: # Собрать статику.
 createsuperuser: # Создать супер пользователя.
 	python src/manage.py createsuperuser --noinput
 
+empty-makemigrations:
+	python src/manage.py makemigrations --empty $(APP)
+
 project-start-in-container: # Запуск проекта в контейнере.
 	make migrate;
 	make collectstatic;
