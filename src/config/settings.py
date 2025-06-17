@@ -3,6 +3,7 @@ from pathlib import Path
 from encodings import utf_8
 import os
 
+from apscheduler.jobstores.redis import RedisJobStore
 from dotenv import load_dotenv
 from django.core.management.utils import get_random_secret_key
 
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'ckeditor',
     'contents.apps.ContentsConfig',
+    'user.apps.UserConfig',
     'bot.apps.BotConfig',
 ]
 
@@ -94,6 +96,30 @@ DATABASES = {
         'HOST': os.getenv('DB_HOST', default='localhost'),
         'PORT': os.getenv('DB_PORT', default='5432'),
     },
+}
+
+REDIS_HOST = os.getenv('REDIS_HOST', default='localhost')
+REDIS_PORT = os.getenv('REDIS_PORT', default='6379')
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', default='redis')
+REDIS_LOCATION = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f'{REDIS_LOCATION}/0',
+        'TIMEOUT': 3600,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+    }
+}
+
+SCHEDULER_JOBSTORES = {
+    'default': RedisJobStore(
+        host=REDIS_HOST,
+        port=REDIS_PORT,
+        password=REDIS_PASSWORD,
+    ),
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -188,3 +214,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 
 BOT_CHANNEL = os.environ.get('BOT_CHANNEL')
+
+BOT_CHAT = os.environ.get('BOT_CHAT')

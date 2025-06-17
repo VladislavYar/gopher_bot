@@ -1,6 +1,4 @@
-from aiogram import Dispatcher, Bot as TelegramBot
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
+from aiogram import Dispatcher
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from django.conf import settings
@@ -8,6 +6,7 @@ from django.conf import settings
 from constants.bot import INTERVAL_POST_TIME
 from services.bot.routers import router
 from services.bot.tasks import send_post
+from utils.bot import get_bot
 from utils.metaclasses import SingletonMeta
 
 
@@ -18,15 +17,14 @@ class Bot(metaclass=SingletonMeta):
         """Инициализация бота."""
         self.dp = Dispatcher()
         self.dp.include_router(router)
-        self.bot = TelegramBot(
-            token=settings.BOT_TOKEN,
-            default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2),
+        self.bot = get_bot()
+        self.scheduler = AsyncIOScheduler(
+            timezone=settings.TIME_ZONE,
+            jobstores=settings.SCHEDULER_JOBSTORES,
         )
-        self.scheduler = AsyncIOScheduler(timezone=settings.TIME_ZONE)
         self.scheduler.add_job(
             send_post,
             trigger=IntervalTrigger(**INTERVAL_POST_TIME),
-            kwargs={'bot': self.bot},
         )
 
     async def start(self) -> None:
@@ -36,5 +34,6 @@ class Bot(metaclass=SingletonMeta):
 
     async def stop(self) -> None:
         """Остановка бота и фоновых задач."""
-        self.scheduler.shutdown(wait=False)
+        if self.scheduler.running:
+            self.scheduler.shutdown()
         await self.dp.stop_polling()

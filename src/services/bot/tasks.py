@@ -1,20 +1,16 @@
 import logging
 
-from aiogram import Bot
 from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
 
 from contents.models import PostType
-from utils.bot import get_content_post
+from utils.bot import get_content_post, get_bot
 
 
-async def send_post(bot: Bot) -> None:
-    """Отправляет пост в канал.
-
-    Args:
-        bot (Bot): экземпляр бота.
-    """
+async def send_post() -> None:
+    """Отправляет пост в канал."""
+    bot = get_bot()
     now = timezone.now()
     async for post_type in PostType.objects.filter(
         Q(time_publication__isnull=True) | Q(time_publication__hour=now.hour, time_publication__minute=now.minute),

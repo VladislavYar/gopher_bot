@@ -1,8 +1,11 @@
 from datetime import datetime
 
-from aiogram.enums import InputMediaType
+from aiogram import Bot
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import InputMediaType, ParseMode
 from aiogram.types.input_file import FSInputFile
 from aiogram.types import InputMediaVideo, InputMediaPhoto, Message
+from django.conf import settings
 from django.db.models import Model
 from html_to_markdown import convert_to_markdown
 
@@ -81,3 +84,15 @@ async def content_reply_to_message(
             await message.reply_audio(audio, caption=text)
     if images_videos:
         await message.reply_media_group(images_videos)
+
+
+def get_bot() -> Bot:
+    """Отдаёт объект telegram-бота.
+
+    Returns:
+        Bot: telegram-бот.
+    """
+    return Bot(
+        token=settings.BOT_TOKEN,
+        default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2),
+    )
