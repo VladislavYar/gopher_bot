@@ -2,6 +2,7 @@ from datetime import datetime
 
 from aiogram import Bot
 from aiogram.client.default import DefaultBotProperties
+from aiogram.utils.text_decorations import markdown_decoration
 from aiogram.enums import InputMediaType, ParseMode
 from aiogram.types.input_file import FSInputFile
 from aiogram.types import InputMediaVideo, InputMediaPhoto, Message
@@ -46,7 +47,7 @@ async def get_content_post(
 
     audios = []
     images_videos = []
-    text = convert_to_markdown(post.text) if post.text else None
+    text = markdown_decoration.quote(convert_to_markdown(post.text)) if post.text else None
     is_add_caption = True
     for media_content in post.media_contents.all():
         file = FSInputFile(media_content.content.path)
