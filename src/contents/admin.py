@@ -23,8 +23,23 @@ class PostAdmin(admin.ModelAdmin):
 class PostTypeAdmin(admin.ModelAdmin):
     """Админ-панель типов постов."""
 
-    list_display = ('id', 'title', 'key', 'time_publication')
-    list_editable = ('title', 'key', 'time_publication')
+    list_display = (
+        'id',
+        'title',
+        'key',
+        'time_publication',
+        'is_publish_by_cron',
+        'is_publish_by_command',
+        'is_publish_by_admin',
+    )
+    list_editable = (
+        'title',
+        'key',
+        'time_publication',
+        'is_publish_by_cron',
+        'is_publish_by_command',
+        'is_publish_by_admin',
+    )
     search_fields = ('title', 'key')
     list_filter = ('title', 'key')
 

@@ -75,15 +75,29 @@ class PostType(models.Model):
         blank=True,
         null=True,
         verbose_name=_('Время публикации'),
-        help_text=_('Время публикации(если пустой, публикуется при кажом запуске cron)'),
+        help_text=_('Время публикации(если пустой, публикуется при каждом запуске cron)'),
         db_comment=_('Время публикации'),
     )
-    is_publish = models.BooleanField(
+
+    is_publish_by_cron = models.BooleanField(
         default=True,
-        verbose_name=_('Флаг разрешения публикации'),
-        help_text=_('Флаг разрешения публикации'),
-        db_comment=_('Флаг разрешения публикации'),
+        verbose_name=_('Флаг публикации по cron'),
+        help_text=_('Флаг публикации по cron'),
+        db_comment=_('Флаг публикации по cron'),
     )
+    is_publish_by_command = models.BooleanField(
+        default=False,
+        verbose_name=_('Флаг публикации командой'),
+        help_text=_('Флаг публикации командой'),
+        db_comment=_('Флаг публикации командой'),
+    )
+    is_publish_by_admin = models.BooleanField(
+        default=True,
+        verbose_name=_('Флаг публикации только админом'),
+        help_text=_('Флаг публикации только админом'),
+        db_comment=_('Флаг публикации только админом'),
+    )
+
     posts = models.ManyToManyField(
         to=Post,
         blank=True,

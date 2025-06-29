@@ -3,12 +3,10 @@ import logging
 from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.filters import Command, CommandObject
-from django.utils import timezone
 
 from constants.bot import CommandEnum, TypeChatEnum
-from constants.models import PostTypeEnum
 from services.bot.filters import IsAdminFilter
-from utils.bot import get_content_post, content_reply_to_message
+from utils.bot import send_post_by_command
 from utils.user import get_user
 
 
@@ -83,60 +81,6 @@ async def handler_unban_user(message: Message, command: CommandObject) -> None:
 
 
 @router.message(
-    F.chat.type.in_(TypeChatEnum.get_all_group()),
-    F.reply_to_message,
-    F.bot,
-    F.from_user.id,
-    F.from_user.username,
-    Command(CommandEnum.HAPPY),
-)
-async def handler_happy(message: Message) -> None:
-    """Обработчик блокировки пользователя.
-
-    Args:
-        message (Message): сообщение.
-    """
-    await message.delete()
-    await get_user(telegram_id=message.from_user.id, username=message.from_user.username)
-    audios, images_videos, text, _ = await get_content_post(
-        is_published=False,
-        types__key=PostTypeEnum.HAPPY,
-        datetime_publication__lte=timezone.now(),
-    )
-    try:
-        await content_reply_to_message(message.reply_to_message, audios, images_videos, text)
-    except Exception as e:
-        logging.error(e)
-
-
-@router.message(
-    F.chat.type.in_(TypeChatEnum.get_all_group()),
-    F.reply_to_message,
-    F.bot,
-    F.from_user.id,
-    F.from_user.username,
-    Command(CommandEnum.SAD),
-)
-async def handler_sad(message: Message) -> None:
-    """Обработчик блокировки пользователя.
-
-    Args:
-        message (Message): сообщение.
-    """
-    await message.delete()
-    await get_user(telegram_id=message.from_user.id, username=message.from_user.username)
-    audios, images_videos, text, _ = await get_content_post(
-        is_published=False,
-        types__key=PostTypeEnum.SAD,
-        datetime_publication__lte=timezone.now(),
-    )
-    try:
-        await content_reply_to_message(message.reply_to_message, audios, images_videos, text)
-    except Exception as e:
-        logging.error(e)
-
-
-@router.message(
     F.bot,
     F.from_user.id,
     F.from_user.username,
@@ -148,6 +92,7 @@ async def handler_all_messages(message: Message) -> None:
         message (Message): сообщение.
     """
     await get_user(telegram_id=message.from_user.id, username=message.from_user.username)
+    await send_post_by_command(message)
     type = message.chat.type
     if type == TypeChatEnum.CHANNEL:
         pass

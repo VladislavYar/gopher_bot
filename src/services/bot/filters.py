@@ -1,6 +1,8 @@
 from aiogram.filters import Filter
 from aiogram.types import Message
 
+from utils.bot import check_is_admin
+
 
 class IsAdminFilter(Filter):
     """Фильтр проверки пользователя на админа."""
@@ -14,11 +16,4 @@ class IsAdminFilter(Filter):
         Returns:
             bool: флаг проверка на админа.
         """
-        bot = message.bot
-        if bot is None:
-            return False
-        admins = await bot.get_chat_administrators(message.chat.id)
-        user = message.from_user
-        if not user:
-            return False
-        return any(admin.user.id == user.id for admin in admins)
+        return await check_is_admin(message)

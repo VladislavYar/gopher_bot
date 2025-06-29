@@ -27,5 +27,3 @@ class CommandEnum(StrEnum):
 
     BAN = 'ban'
     UNBAN = 'unban'
-    HAPPY = 'happy'
-    SAD = 'sad'

@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 
 from aiogram import Bot
 from aiogram.client.default import DefaultBotProperties
@@ -8,6 +9,7 @@ from aiogram.types.input_file import FSInputFile
 from aiogram.types import InputMediaVideo, InputMediaPhoto, Message
 from django.conf import settings
 from django.db.models import Model
+from django.utils import timezone
 from html_to_markdown import convert_to_markdown
 
 from contents.models import Post, MediaContent
@@ -97,3 +99,64 @@ def get_bot() -> Bot:
         token=settings.BOT_TOKEN,
         default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2),
     )
+
+
+async def check_is_admin(message: Message) -> bool:
+    """Проверка на админа.
+
+    Args:
+        message (Message): сообщение.
+
+    Returns:
+        bool: флаг проверка на админа.
+    """
+    bot = message.bot
+    if bot is None:
+        return False
+    admins = await bot.get_chat_administrators(message.chat.id)
+    user = message.from_user
+    if not user:
+        return False
+    return any(admin.user.id == user.id for admin in admins)
+
+
+def get_command(message: Message) -> str | None:
+    """Отдаёт команду сообщения.
+
+    Args:
+        message (Message): сообщение.
+
+    Returns:
+        str | None: команда сообщения.
+    """
+    text = message.text
+    if text and text.startswith('/') and len(text) > 1:
+        if command := text[1:].split()[0]:
+            return command
+
+
+async def send_post_by_command(message: Message) -> None:
+    """Отправка поста по команде.
+
+    Args:
+        message (Message): сообщение.
+    """
+    command = get_command(message)
+    if not command:
+        return
+    filters = {} if await check_is_admin(message) else {'types__is_publish_by_admin': False}
+    audios, images_videos, text, _ = await get_content_post(
+        is_published=False,
+        types__key=command,
+        types__is_publish_by_command=True,
+        datetime_publication__lte=timezone.now(),
+        **filters,
+    )
+    try:
+        if reply_to_message := message.reply_to_message:
+            await content_reply_to_message(reply_to_message, audios, images_videos, text)
+        else:
+            await content_reply_to_message(message, audios, images_videos, text)
+    except Exception as e:
+        logging.error(e)
+    await message.delete()

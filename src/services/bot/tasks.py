@@ -14,7 +14,7 @@ async def send_post() -> None:
     now = timezone.now()
     async for post_type in PostType.objects.filter(
         Q(time_publication__isnull=True) | Q(time_publication__hour=now.hour, time_publication__minute=now.minute),
-        is_publish=True,
+        is_publish_by_cron=True,
         posts__is_published=False,
     ):
         audios, images_videos, text, post = await get_content_post(
