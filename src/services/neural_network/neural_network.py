@@ -67,6 +67,7 @@ class DeepSeekNeualNetworkPrairieDog(DeepSeekNeualNetworkBase):
     """Класс нейросети DeepSeek, отвечающей как луговая собачка.
 
     Attributes:
+        token (str): токен.
         url (str): url к API.
         system_prompt (str): описание ответов нейросети.
         temperature (float): коэффициент.
