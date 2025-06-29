@@ -1,14 +1,13 @@
 import logging
 
-from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
 
 from contents.models import PostType
-from utils.bot import get_content_post, get_bot
+from utils.bot import get_content_post, get_bot, send_post_by_channel as send_post
 
 
-async def send_post() -> None:
+async def send_post_by_channel() -> None:
     """Отправляет пост в канал."""
     bot = get_bot()
     now = timezone.now()
@@ -23,13 +22,7 @@ async def send_post() -> None:
             datetime_publication__lte=now,
         )
         try:
-            if not audios and not images_videos and text:
-                await bot.send_message(settings.BOT_CHANNEL, text)
-            if audios:
-                for audio in audios:
-                    await bot.send_audio(settings.BOT_CHANNEL, audio, caption=text)
-            if images_videos:
-                await bot.send_media_group(settings.BOT_CHANNEL, images_videos)
+            await send_post(bot, audios, images_videos, text)
             if post:
                 post.is_published = True
                 await post.asave()

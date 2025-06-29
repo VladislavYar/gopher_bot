@@ -1,14 +1,30 @@
-from django.contrib import admin
+from admin_extra_buttons.api import button
+from admin_extra_buttons.mixins import ExtraButtonsMixin
+from asgiref.sync import async_to_sync
+from django.contrib import admin, messages
+from django.core.handlers.asgi import ASGIRequest
 from django.utils.html import format_html
+from django.utils.encoding import force_str
 from django.utils.safestring import SafeString
+from django.utils import timezone
 
 from contents.models import PostType, Post, MediaContent
 from contents.inlines import PostTypeManyToManyInline, PostManyToManyInline, MediaContentInline
-from constants.admin import SIZE_MEDIA_CONTENT
+from constants.admin import (
+    SIZE_MEDIA_CONTENT,
+    BUTTON_LABEL_SEND_POST,
+    MESSAGE_NO_SEND_POST,
+    MESSAGE_SEND_POST,
+    MESSAGE_POST_IS_PUBLISHED,
+    MESSAGE_POST_NOT_TIME_PUBLICATION,
+    MESSAGE_POST_TYPE_NOT_POST,
+)
+from constants.models import PostTypeEnum
+from utils.bot import get_content_post, get_bot, send_post_by_channel
 
 
 @admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     """Админ-панель постов."""
 
     list_display = ('id', 'title', 'is_published', 'datetime_publication')
@@ -17,6 +33,36 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ('is_published', 'types')
 
     inlines = (MediaContentInline, PostTypeManyToManyInline)
+
+    @button(label=BUTTON_LABEL_SEND_POST)
+    def send_post_by_channel(self, request: ASGIRequest, pk: int) -> None:
+        """Опубликовать пост в канал.
+
+        Args:
+            request (ASGIRequest): запрос к серверу.
+            pk (int): первичный ключ поста.
+        """
+        obj: Post = self.get_object(request, pk)
+        errors = []
+        if obj.is_published:
+            errors.append(MESSAGE_POST_IS_PUBLISHED)
+        if obj.datetime_publication > timezone.now():
+            errors.append(MESSAGE_POST_NOT_TIME_PUBLICATION)
+        if PostTypeEnum.POST not in obj.types.all().values_list('key', flat=True):
+            errors.append(MESSAGE_POST_TYPE_NOT_POST.format(PostTypeEnum.POST))
+        if errors:
+            self.message_user(
+                request, MESSAGE_NO_SEND_POST.format(', '.join(force_str(e) for e in errors)), level=messages.ERROR
+            )
+            return
+        try:
+            audios, images_videos, text, _ = async_to_sync(get_content_post)(pk=obj.pk)
+            async_to_sync(send_post_by_channel)(bot=get_bot(), audios=audios, images_videos=images_videos, text=text)
+            obj.is_published = True
+            obj.save()
+            self.message_user(request, MESSAGE_SEND_POST)
+        except Exception as e:
+            self.message_user(request, MESSAGE_NO_SEND_POST.format(e), level=messages.ERROR)
 
 
 @admin.register(PostType)
@@ -72,10 +118,16 @@ class MediaContentAdmin(admin.ModelAdmin):
         url = obj.content.url
         if obj.type == MediaContent.Type.IMAGE:
             return format_html(
-                f'<img src="{url}" style="max-width:{SIZE_MEDIA_CONTENT}px; max-height:{SIZE_MEDIA_CONTENT}px"/>',
+                '<img src="{}" style="max-width:{}px; max-height:{}px"/>',
+                url,
+                SIZE_MEDIA_CONTENT,
+                SIZE_MEDIA_CONTENT,
             )
         elif obj.type == MediaContent.Type.VIDEO:
             return format_html(
-                f'<video controls width="{SIZE_MEDIA_CONTENT}" height="{SIZE_MEDIA_CONTENT}" src="{url}"></video>',
+                '<video controls width="{}" height="{}" src="{}"></video>',
+                SIZE_MEDIA_CONTENT,
+                SIZE_MEDIA_CONTENT,
+                url,
             )
-        return format_html(f'<audio controls src="{url}"></audio>')
+        return format_html('<audio controls src="{}"></audio>', url)

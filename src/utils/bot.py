@@ -1,5 +1,4 @@
 from datetime import datetime
-import logging
 
 from aiogram import Bot
 from aiogram.client.default import DefaultBotProperties
@@ -152,11 +151,31 @@ async def send_post_by_command(message: Message) -> None:
         datetime_publication__lte=timezone.now(),
         **filters,
     )
-    try:
-        if reply_to_message := message.reply_to_message:
-            await content_reply_to_message(reply_to_message, audios, images_videos, text)
-        else:
-            await content_reply_to_message(message, audios, images_videos, text)
-    except Exception as e:
-        logging.error(e)
+    if reply_to_message := message.reply_to_message:
+        await content_reply_to_message(reply_to_message, audios, images_videos, text)
+    else:
+        await content_reply_to_message(message, audios, images_videos, text)
     await message.delete()
+
+
+async def send_post_by_channel(
+    bot: Bot,
+    audios: list[FSInputFile],
+    images_videos: list[InputMediaPhoto | InputMediaVideo],
+    text: str | None,
+) -> None:
+    """Отправка контента в канал.
+
+    Args:
+        bot (Bot): сообщение.
+        audios (list[FSInputFile]): файлы с аудио.
+        images_videos (list[InputMediaPhoto  |  InputMediaVideo]): файлы с фото/видео.
+        text (str | None): текст.
+    """
+    if not audios and not images_videos and text:
+        await bot.send_message(settings.BOT_CHANNEL, text)
+    if audios:
+        for audio in audios:
+            await bot.send_audio(settings.BOT_CHANNEL, audio, caption=text)
+    if images_videos:
+        await bot.send_media_group(settings.BOT_CHANNEL, images_videos)

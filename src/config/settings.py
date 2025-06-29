@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ckeditor',
+    'admin_extra_buttons',
     'contents.apps.ContentsConfig',
     'user.apps.UserConfig',
     'bot.apps.BotConfig',

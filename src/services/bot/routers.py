@@ -92,7 +92,10 @@ async def handler_all_messages(message: Message) -> None:
         message (Message): сообщение.
     """
     await get_user(telegram_id=message.from_user.id, username=message.from_user.username)
-    await send_post_by_command(message)
+    try:
+        await send_post_by_command(message)
+    except Exception as e:
+        logging.error(e)
     type = message.chat.type
     if type == TypeChatEnum.CHANNEL:
         pass

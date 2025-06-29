@@ -5,7 +5,7 @@ from django.conf import settings
 
 from constants.bot import INTERVAL_POST_TIME
 from services.bot.routers import router
-from services.bot.tasks import send_post
+from services.bot.tasks import send_post_by_channel
 from utils.bot import get_bot
 from utils.metaclasses import SingletonMeta
 
@@ -23,7 +23,7 @@ class Bot(metaclass=SingletonMeta):
             jobstores=settings.SCHEDULER_JOBSTORES,
         )
         self.scheduler.add_job(
-            send_post,
+            send_post_by_channel,
             trigger=IntervalTrigger(**INTERVAL_POST_TIME),
         )
 
