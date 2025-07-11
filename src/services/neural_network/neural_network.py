@@ -59,7 +59,6 @@ class DeepSeekNeualNetworkBase(NeualNetworkABC):
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.post(cls.url, json=payload) as response:
                 data = await response.json()
-                print(data)
                 return data['choices'][0]['message']['content']
 
 
